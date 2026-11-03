@@ -121,6 +121,25 @@ Preencha `ANTHROPIC_API_KEY` no `.env` (o arquivo não vai para o git). O modelo
 A avaliação pede confirmação antes de fazer mais de 20 chamadas. Preços por token e cotação do dólar
 estão em `data/pricing.yaml`, com a data em que foram conferidos.
 
+## Testar sem a IA (modo simulado)
+
+Com `LLM_MODE=mock`, o LLM é trocado por um classificador simples de palavras-chave
+(`app/mock_llm.py`). Não precisa de chave nem gasta nada. O fluxo, as regras, os templates, o log, o
+chat e o painel são os mesmos. Todas as telas mostram o aviso **MODO SIMULADO**.
+
+| Comando | O que faz |
+|---|---|
+| `make up-mock` | Sobe API, chat (`:8501`) e painel (`:8502`) com Docker Compose em modo simulado |
+| `make demo-report SPLIT=dev` | Gera um relatório de demonstração em `reports/demo/` (fora do git) |
+| `make api-mock`, `make chat-mock`, `make dashboard-mock` | O mesmo, sem Docker (um terminal para cada) |
+
+Mensagens para experimentar no chat: "sem luz na pituba", "só a minha casa ficou sem energia, moro
+em Brotas", "sem luz na rua toda no Cabula", "luz acabou", "fio caído na rua faiscando", "minha conta
+veio alta", "paguei e a luz continua cortada", "oi".
+
+Os números do modo simulado **não são resultado de avaliação**: o classificador foi escrito olhando
+os mesmos exemplos e serve só para ver o sistema funcionando. Os relatórios reais ficam em `reports/`.
+
 ## Estrutura
 
 ```

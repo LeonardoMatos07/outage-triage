@@ -6,9 +6,10 @@ from fastapi import Depends, FastAPI
 
 from app.database import connect, initialize
 from app.llm import classify
+from app.mock_llm import mock_classify
 from app.pipeline import Classifier, run_triage
 from app.schemas import TriageRequest, TriageResponse
-from app.settings import database_path
+from app.settings import database_path, is_mock_mode
 
 app = FastAPI(title="Outage Triage")
 
@@ -23,7 +24,7 @@ def get_connection() -> Iterator[sqlite3.Connection]:
 
 
 def get_classifier() -> Classifier:
-    return classify
+    return mock_classify if is_mock_mode() else classify
 
 
 @app.get("/health")

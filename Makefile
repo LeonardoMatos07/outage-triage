@@ -7,7 +7,7 @@ MODEL ?= claude-haiku-5-5
 SPLIT ?= test
 COMPARE_MODELS ?= claude-haiku-5-5 claude-sonnet-5-5
 
-.PHONY: eval-compare chat dashboard api install lint types test nocomments check format up down eval triage-sample check-dataset
+.PHONY: demo up-mock demo-report api-mock chat-mock dashboard-mock eval-compare chat dashboard api install lint types test nocomments check format up down eval triage-sample check-dataset
 
 install:
 	uv sync
@@ -57,3 +57,21 @@ chat:
 
 dashboard:
 	uv run streamlit run ui/dashboard.py --server.port 8502
+
+up-mock:
+	LLM_MODE=mock docker compose up --build
+
+demo-report:
+	uv run python -m eval.run_eval --mock --split $(SPLIT)
+
+api-mock:
+	LLM_MODE=mock uv run uvicorn app.api:app --port 8000
+
+chat-mock:
+	LLM_MODE=mock API_URL=http://localhost:8000 uv run streamlit run ui/chat.py --server.port 8501
+
+dashboard-mock:
+	LLM_MODE=mock uv run streamlit run ui/dashboard.py --server.port 8502
+
+demo:
+	uv run python -m scripts.run_demo

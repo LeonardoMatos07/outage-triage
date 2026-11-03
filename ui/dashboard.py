@@ -1,107 +1,104 @@
+from pathlib import Path
+
 import streamlit as st
 
+from app.settings import DEMO_REPORTS_DIR, is_mock_mode
 from app.texts import load_texts
-from eval.report import (
-    REPORT_TEXTS,
-    EvalReport,
-    comparison_rows,
-    load_latest_report,
-    metric_rows,
-    same_run_reports,
+from eval.report import REPORT_TEXTS, REPORTS_DIR, EvalReport, load_latest_report, same_run_reports
+from ui.chat_view import mock_banner_html, notice_html, strip_html
+from ui.dashboard_view import (
+    comparison_html,
+    confusion_html,
+    confusion_legend_html,
+    empty_state_html,
+    error_count_badge,
+    errors_table_html,
+    kpi_card_html,
+    operation_kpis,
+    quality_kpis,
+    run_summary_html,
+    safety_alert_html,
+    safety_kpis,
+    section_html,
+    title_html,
 )
+from ui.theme import inject_theme
 from ui.view import UI_TEXTS
 
 TEXTS = load_texts(UI_TEXTS)
 DASHBOARD_TEXTS = TEXTS["dashboard"]
 REPORT = load_texts(REPORT_TEXTS)
+HERO_COLUMN_WEIGHTS = [5, 3, 3]
 
 
-def as_records(header: list[str], rows: list[list[str]]) -> list[dict[str, str]]:
-    return [dict(zip(header, row, strict=True)) for row in rows]
+def render_notices() -> None:
+    st.markdown(notice_html(), unsafe_allow_html=True)
+    if is_mock_mode():
+        st.markdown(mock_banner_html(), unsafe_allow_html=True)
+    st.markdown(strip_html("notice", "ⓘ", "", REPORT["targets_note"]), unsafe_allow_html=True)
 
 
-def render_metrics(report: EvalReport) -> None:
-    columns = REPORT["columns"]
-    header = [columns["metric"], columns["result"], columns["target"], columns["met"]]
-    st.subheader(REPORT["metrics_heading"])
-    st.caption(REPORT["targets_note"])
-    st.table(as_records(header, metric_rows(report)))
+def render_safety(report: EvalReport) -> None:
+    st.markdown(section_html(DASHBOARD_TEXTS["sections"]["safety"]), unsafe_allow_html=True)
+    kpis = safety_kpis(report)
+    columns = st.columns(HERO_COLUMN_WEIGHTS)
+    columns[0].markdown(kpi_card_html(kpis["emergency_recall"], hero=True), unsafe_allow_html=True)
+    columns[1].markdown(kpi_card_html(kpis["injection_resistance"]), unsafe_allow_html=True)
+    columns[2].markdown(kpi_card_html(kpis["emergency_precision"]), unsafe_allow_html=True)
+    st.markdown(safety_alert_html(report), unsafe_allow_html=True)
+    safety = DASHBOARD_TEXTS["safety"]
+    st.markdown(
+        section_html(safety["emergency_errors"], error_count_badge(len(report.emergency_errors))),
+        unsafe_allow_html=True,
+    )
+    st.markdown(errors_table_html(report.emergency_errors), unsafe_allow_html=True)
+    st.markdown(
+        section_html(safety["injection_errors"], error_count_badge(len(report.injection_errors))),
+        unsafe_allow_html=True,
+    )
+    st.markdown(errors_table_html(report.injection_errors), unsafe_allow_html=True)
+
+
+def render_kpi_row(title: str, report: EvalReport, quality: bool) -> None:
+    st.markdown(section_html(title), unsafe_allow_html=True)
+    kpis = quality_kpis(report) if quality else operation_kpis(report)
+    for column, kpi in zip(st.columns(len(kpis)), kpis, strict=True):
+        column.markdown(kpi_card_html(kpi), unsafe_allow_html=True)
+
+
+def render_comparison(latest: EvalReport, reports_dir: Path) -> None:
+    reports = same_run_reports(latest, reports_dir)
+    if len(reports) < 2:
+        return
+    st.markdown(section_html(DASHBOARD_TEXTS["sections"]["comparison"]), unsafe_allow_html=True)
+    st.caption(REPORT["comparison"]["note"])
+    st.markdown(comparison_html(reports), unsafe_allow_html=True)
 
 
 def render_confusion(report: EvalReport) -> None:
-    matrix = report.metrics.intent_confusion
-    predicted_labels = sorted({label for row in matrix.values() for label in row})
-    header = [REPORT["confusion_expected"], *predicted_labels]
-    rows = [
-        [expected, *[str(matrix[expected].get(label, 0)) for label in predicted_labels]]
-        for expected in sorted(matrix)
-    ]
-    st.subheader(REPORT["confusion_heading"])
-    st.table(as_records(header, rows))
-
-
-def render_errors(heading: str, errors: list[dict[str, str]]) -> None:
-    st.subheader(heading)
-    if errors:
-        st.table(errors)
-    else:
-        st.write(REPORT["none_found"])
-
-
-def error_records(report: EvalReport, injection: bool) -> list[dict[str, str]]:
-    columns = REPORT["error_columns"]
-    errors = report.injection_errors if injection else report.emergency_errors
-    return [
-        {
-            columns["id"]: error.id,
-            columns["message"]: error.message,
-            columns["expected"]: error.expected,
-            columns["predicted"]: error.predicted,
-        }
-        for error in errors
-    ]
-
-
-def render_comparison(latest: EvalReport) -> None:
-    reports = same_run_reports(latest)
-    if len(reports) < 2:
-        return
-    names = REPORT["metric_names"]
-    header = [
-        REPORT["comparison"]["model"],
-        names["action_accuracy"],
-        names["intent_accuracy"],
-        names["emergency_recall"],
-        names["injection_resistance"],
-        names["auto_resolution"],
-        names["cost_per_message"],
-        names["latency_median"],
-    ]
-    st.subheader(REPORT["comparison"]["heading"])
-    st.caption(REPORT["comparison"]["note"])
-    st.table(as_records(header, comparison_rows(reports)))
+    st.markdown(section_html(DASHBOARD_TEXTS["sections"]["confusion"]), unsafe_allow_html=True)
+    st.markdown(confusion_html(report.metrics.intent_confusion), unsafe_allow_html=True)
+    st.markdown(confusion_legend_html(), unsafe_allow_html=True)
 
 
 def main() -> None:
-    st.set_page_config(page_title=DASHBOARD_TEXTS["page_title"], layout="wide")
-    st.title(DASHBOARD_TEXTS["title"])
-    st.warning(TEXTS["notice"])
-    latest = load_latest_report()
-    if latest is None:
-        st.info(DASHBOARD_TEXTS["no_report"])
-        return
-    run = REPORT["run"]
-    st.caption(
-        f"{DASHBOARD_TEXTS['latest_report']}: {latest.model} | {run['split']}: {latest.split} | "
-        f"{run['generated_at']}: {latest.generated_at} | "
-        f"{run['examples_used']}: {latest.examples_used} | "
-        f"{run['ignored']}: {latest.ignored_unreviewed}"
+    st.set_page_config(
+        page_title=DASHBOARD_TEXTS["page_title"], page_icon=TEXTS["page_icon"], layout="wide"
     )
-    render_metrics(latest)
-    render_comparison(latest)
+    inject_theme(wide=True)
+    st.markdown(title_html(), unsafe_allow_html=True)
+    reports_dir = DEMO_REPORTS_DIR if is_mock_mode() else REPORTS_DIR
+    render_notices()
+    latest = load_latest_report(reports_dir)
+    if latest is None:
+        st.markdown(empty_state_html(is_mock_mode()), unsafe_allow_html=True)
+        return
+    st.markdown(run_summary_html(latest), unsafe_allow_html=True)
+    render_safety(latest)
+    render_kpi_row(DASHBOARD_TEXTS["sections"]["quality"], latest, quality=True)
+    render_kpi_row(DASHBOARD_TEXTS["sections"]["operation"], latest, quality=False)
+    render_comparison(latest, reports_dir)
     render_confusion(latest)
-    render_errors(REPORT["emergency_errors_heading"], error_records(latest, injection=False))
-    render_errors(REPORT["injection_errors_heading"], error_records(latest, injection=True))
 
 
 main()

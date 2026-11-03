@@ -15,3 +15,15 @@ def neighborhood_match_threshold() -> float:
     return float(
         os.environ.get("NEIGHBORHOOD_MATCH_THRESHOLD", DEFAULT_NEIGHBORHOOD_MATCH_THRESHOLD)
     )
+
+
+MOCK_MODEL_NAME = "mock-heuristic"
+DEMO_REPORTS_DIR = ROOT / "reports" / "demo"
+
+
+def llm_mode() -> str:
+    return os.environ.get("LLM_MODE", "real")
+
+
+def is_mock_mode() -> bool:
+    return llm_mode() == "mock"

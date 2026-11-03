@@ -5,6 +5,7 @@ run:
   generated_at: "Gerado em"
   examples_used: "Mensagens avaliadas"
   ignored: "Linhas ignoradas por não estarem revisadas"
+mock_notice: "MODO SIMULADO: este relatório usa um classificador de palavras-chave no lugar do LLM. Não é resultado de avaliação real."
 notice: "Dados sintéticos. As ocorrências usadas na avaliação são simuladas."
 metrics_heading: "Métricas"
 targets_note: "As metas abaixo são premissas do autor, não números da indústria."

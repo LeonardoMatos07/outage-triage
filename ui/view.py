@@ -1,7 +1,16 @@
-from app.schemas import TriageResponse
+from enum import StrEnum
+
+from app.schemas import Action, TriageResponse
 from app.texts import load_texts
 
 UI_TEXTS = "ui_pt.yaml"
+
+
+class OutcomeKind(StrEnum):
+    EMERGENCY = "emergency"
+    QUESTION = "question"
+    HANDOFF = "handoff"
+    AUTOMATIC = "automatic"
 
 
 def build_details(response: TriageResponse) -> dict[str, str]:
@@ -19,6 +28,16 @@ def build_details(response: TriageResponse) -> dict[str, str]:
     return details
 
 
+def outcome_kind(response: TriageResponse) -> OutcomeKind:
+    if response.action is Action.EMERGENCY:
+        return OutcomeKind.EMERGENCY
+    if response.action is Action.ASK_NEIGHBORHOOD:
+        return OutcomeKind.QUESTION
+    if response.handed_to_human:
+        return OutcomeKind.HANDOFF
+    return OutcomeKind.AUTOMATIC
+
+
 def outcome_label(response: TriageResponse) -> str:
-    chat_texts = load_texts(UI_TEXTS)["chat"]
-    return str(chat_texts["handed_to_human" if response.handed_to_human else "automatic"])
+    outcomes = load_texts(UI_TEXTS)["chat"]["outcomes"]
+    return str(outcomes[outcome_kind(response).value])

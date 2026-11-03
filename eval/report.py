@@ -4,7 +4,7 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from app.settings import ROOT
+from app.settings import MOCK_MODEL_NAME, ROOT
 from app.texts import load_texts
 from eval.metrics import (
     ErrorCase,
@@ -132,6 +132,12 @@ def error_lines(errors: list[ErrorCase]) -> list[str]:
     )
 
 
+def mock_notice_lines(model: str) -> list[str]:
+    if model != MOCK_MODEL_NAME:
+        return []
+    return ["", f"> {load_texts(REPORT_TEXTS)['mock_notice']}"]
+
+
 def render_report(report: EvalReport) -> str:
     texts = load_texts(REPORT_TEXTS)
     run = texts["run"]
@@ -140,6 +146,7 @@ def render_report(report: EvalReport) -> str:
         f"# {texts['title']}",
         "",
         f"> {texts['notice']}",
+        *mock_notice_lines(report.model),
         "",
         f"- {run['model']}: `{report.model}`",
         f"- {run['split']}: `{report.split}`",
