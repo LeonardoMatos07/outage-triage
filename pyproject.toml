@@ -1,0 +1,38 @@
+[project]
+name = "outage-triage"
+version = "0.1.0"
+description = "Outage triage MVP for a fictional power distribution company"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "anthropic>=0.40",
+    "fastapi[standard]>=0.115",
+    "pydantic>=2.9",
+    "pyyaml>=6.0",
+    "rapidfuzz>=3.10",
+    "streamlit>=1.40",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.13",
+    "pytest>=8.3",
+    "ruff>=0.8",
+    "types-pyyaml>=6.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["app", "ui", "eval", "scripts", "tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
