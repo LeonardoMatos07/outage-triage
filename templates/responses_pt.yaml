@@ -1,0 +1,19 @@
+simulation_notice: "Ambiente de demonstração da Distribuidora Exemplo (empresa fictícia). As ocorrências exibidas são simuladas."
+
+phrases:
+  forecast_unavailable: "ainda sem previsão cadastrada"
+
+queue_labels:
+  emergency: "emergência"
+  outage: "falta de energia"
+  billing: "contas"
+  reconnection: "religação"
+  general: "atendimento geral"
+
+responses:
+  known_outage: "Já temos uma ocorrência registrada em {neighborhood} (protocolo {protocol}). Previsão cadastrada: {forecast}. Pedimos desculpas pelo transtorno."
+  ticket_opened_my_home: "Registramos o seu chamado (protocolo {protocol}). Como a falta de energia parece ser só na sua casa, confira se o disjuntor geral do quadro está desligado. Se estiver, ligue-o de novo. Se continuar sem energia, nossa equipe segue com o chamado."
+  ticket_opened_possible_outage: "Registramos o seu chamado (protocolo {protocol}) em {neighborhood}. Ainda não havia ocorrência cadastrada na sua região, então ele foi marcado como possível nova ocorrência para a nossa equipe analisar."
+  emergency_safety: "ATENÇÃO: não se aproxime de fios, postes ou equipamentos danificados e mantenha pessoas e animais longe. Estamos encaminhando o seu caso agora, com prioridade máxima, para um atendente."
+  ask_neighborhood: "Para localizar a ocorrência, em qual bairro você está?"
+  handoff_to_agent: "Para esse assunto, um atendente da fila de {queue_label} vai continuar o seu atendimento por aqui."

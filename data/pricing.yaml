@@ -1,0 +1,9 @@
+checked_on: null
+usd_to_brl: null
+models:
+  claude-haiku-5-5:
+    input_usd_per_million_tokens: null
+    output_usd_per_million_tokens: null
+  claude-sonnet-5-5:
+    input_usd_per_million_tokens: null
+    output_usd_per_million_tokens: null

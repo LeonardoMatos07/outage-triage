@@ -1,0 +1,5 @@
+protocol,neighborhood,status,started_at,estimated_restoration
+OC-0001,Pituba,active,2026-11-03T05:40:00,2026-11-03T14:00:00
+OC-0002,Cajazeiras,active,2026-11-03T07:15:00,2026-11-03T18:30:00
+OC-0003,Liberdade,active,2026-11-03T06:05:00,
+OC-0004,Barra,resolved,2026-11-02T21:10:00,2026-11-02T23:45:00
