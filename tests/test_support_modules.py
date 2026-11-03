@@ -95,5 +95,16 @@ def test_cost_is_computed_from_configured_prices() -> None:
 
 
 def test_cost_is_unknown_when_prices_are_not_configured() -> None:
-    assert estimate_cost_brl("claude-haiku-5-5", 100, 10) is None
     assert estimate_cost_brl("unknown", 100, 10, {"usd_to_brl": 5.0, "models": {}}) is None
+    missing_rate = {
+        "usd_to_brl": None,
+        "models": {
+            "m": {"input_usd_per_million_tokens": 1.0, "output_usd_per_million_tokens": 5.0}
+        },
+    }
+    assert estimate_cost_brl("m", 100, 10, missing_rate) is None
+
+
+def test_repository_pricing_covers_both_evaluated_models() -> None:
+    for model in ("claude-haiku-5-5", "claude-sonnet-5-5"):
+        assert estimate_cost_brl(model, 1_000_000, 1_000_000) is not None
