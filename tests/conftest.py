@@ -1,5 +1,6 @@
 import sqlite3
 from collections.abc import Iterator
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -42,6 +43,11 @@ class ScriptedClassifier:
     def __call__(self, message: str) -> LlmResponse:
         self.received.append(message)
         return make_llm_response(self.remaining.pop(0))
+
+
+@pytest.fixture(autouse=True)
+def isolated_database(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "isolated.db"))
 
 
 @pytest.fixture

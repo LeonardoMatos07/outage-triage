@@ -116,7 +116,11 @@ def mean_cost(predictions: list[Prediction]) -> float | None:
 
 
 def latency_stats(predictions: list[Prediction]) -> LatencyStats:
-    latencies = sorted(p.latency_seconds for p in predictions)
+    return latency_stats_from([p.latency_seconds for p in predictions])
+
+
+def latency_stats_from(values: list[float]) -> LatencyStats:
+    latencies = sorted(values)
     if not latencies:
         return LatencyStats(median_seconds=None, p95_seconds=None)
     p95_index = math.ceil(P95_FRACTION * len(latencies)) - 1

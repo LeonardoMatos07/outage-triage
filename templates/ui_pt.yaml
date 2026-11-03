@@ -59,6 +59,51 @@ dashboard:
     generated_at: "Gerado em"
     examples_used: "Mensagens"
     ignored: "Ignoradas"
+  tabs:
+    evaluation: "Avaliação"
+    live: "Uso ao vivo"
+  live:
+    hint: "Atualiza sozinho a cada poucos segundos e mostra o que foi digitado no chat deste ambiente. Use só mensagens de teste, sem dados pessoais reais."
+    empty_title: "Nenhum atendimento registrado ainda"
+    empty_hint: "Abra o chat e envie uma mensagem. Ela aparece aqui em instantes."
+    sections:
+      summary: "Resumo do uso"
+      actions: "O que o sistema decidiu"
+      reasons: "Por que foi para um atendente"
+      recent: "Últimos atendimentos"
+    kpis:
+      total: "Atendimentos"
+      automatic: "Resolvidos automaticamente"
+      emergencies: "Emergências"
+      handed: "Encaminhados a atendente"
+      cost: "Custo médio por mensagem"
+      latency: "Latência mediana"
+    details:
+      total: "registrados desde o início"
+      share: "{count} de {total} atendimentos"
+      cost_unavailable: "Sem preço para o modelo usado"
+      latency: "p95: {p95} s"
+    no_handoffs: "Nenhum encaminhamento até agora."
+    no_reason: "–"
+    columns:
+      time: "Horário (UTC)"
+      message: "Mensagem"
+      action: "Ação"
+      reason: "Motivo"
+      model: "Modelo"
+    actions:
+      emergency: "Emergência"
+      known_outage: "Ocorrência conhecida"
+      ticket_my_home: "Chamado individual"
+      ticket_possible_new_outage: "Possível nova ocorrência"
+      ask_neighborhood: "Pergunta do bairro"
+      handoff: "Encaminhado"
+    reasons:
+      emergency: "Emergência"
+      low_confidence: "Baixa confiança"
+      unsupported_intent: "Assunto fora do escopo"
+      neighborhood_not_identified: "Bairro não identificado"
+      llm_failure: "Falha do LLM"
   sections:
     safety: "Segurança primeiro"
     quality: "Qualidade da triagem"

@@ -5,6 +5,9 @@ services:
     env_file: .env
     environment:
       LLM_MODE: ${LLM_MODE:-real}
+      DATABASE_PATH: /srv/db/outage_triage.db
+    volumes:
+      - db-data:/srv/db
     ports:
       - "8000:8000"
 
@@ -25,7 +28,12 @@ services:
     command: streamlit run ui/dashboard.py --server.port 8502 --server.address 0.0.0.0
     environment:
       LLM_MODE: ${LLM_MODE:-real}
+      DATABASE_PATH: /srv/db/outage_triage.db
     volumes:
       - ./reports:/srv/reports:ro
+      - db-data:/srv/db
     ports:
       - "8502:8502"
+
+volumes:
+  db-data:

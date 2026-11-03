@@ -325,11 +325,22 @@ BASE_CSS = """
 .dx-empty__title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.4rem; }
 .dx-empty__hint { color: var(--dx-muted); margin-bottom: 0.9rem; }
 .dx-empty code { font-size: 0.9rem; }
+.dx-bars { display: grid; gap: 0.55rem; margin: 0.4rem 0 1rem; }
+.dx-bar-row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 15rem) 1fr 3rem;
+  gap: 0.75rem;
+  align-items: center;
+}
+.dx-bar-row__label { font-size: 0.92rem; }
+.dx-bar-row__count { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+.dx-bar-row .dx-meter { margin: 0; }
 @media (max-width: 640px) {
   .block-container { padding-left: 1rem; padding-right: 1rem; }
   .dx-header { gap: 0.65rem; }
   .dx-title { font-size: 1.5rem; }
   .dx-card--hero .dx-card__value { font-size: 2.6rem; }
+  .dx-bar-row { grid-template-columns: 6.5rem 1fr 2rem; gap: 0.5rem; }
 }
 """
 
