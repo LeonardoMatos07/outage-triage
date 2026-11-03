@@ -2,6 +2,7 @@ import sqlite3
 
 import anthropic
 import httpx2
+import pytest
 from fastapi.testclient import TestClient
 
 from app.api import app, get_classifier, get_connection
@@ -140,3 +141,14 @@ def test_triage_endpoint(connection: sqlite3.Connection) -> None:
 
 def test_endpoint_rejects_empty_message() -> None:
     assert TestClient(app).post("/v1/triage", json={"message": ""}).status_code == 422
+
+
+def test_missing_api_key_hands_off_and_keeps_keyword_emergencies(
+    connection: sqlite3.Connection, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("ANTHROPIC_AUTH_TOKEN", raising=False)
+    ordinary = run_triage(connection, "estou sem luz")
+    assert ordinary.handoff_reason is HandoffReason.LLM_FAILURE
+    emergency = run_triage(connection, "fio caido na rua")
+    assert emergency.action is Action.EMERGENCY

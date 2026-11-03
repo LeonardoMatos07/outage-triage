@@ -1,7 +1,13 @@
+-include .env
+export
+
+export PYTHONPATH := .
+
 MODEL ?= claude-haiku-5-5
 SPLIT ?= test
+COMPARE_MODELS ?= claude-haiku-5-5 claude-sonnet-5-5
 
-.PHONY: install lint types test nocomments check format up down eval triage-sample check-dataset
+.PHONY: eval-compare chat dashboard api install lint types test nocomments check format up down eval triage-sample check-dataset
 
 install:
 	uv sync
@@ -39,3 +45,15 @@ triage-sample:
 
 eval:
 	uv run python -m eval.run_eval --model $(MODEL) --split $(SPLIT)
+
+eval-compare:
+	uv run python -m eval.run_eval --model $(COMPARE_MODELS) --split $(SPLIT)
+
+api:
+	uv run uvicorn app.api:app --port 8000
+
+chat:
+	uv run streamlit run ui/chat.py --server.port 8501
+
+dashboard:
+	uv run streamlit run ui/dashboard.py --server.port 8502

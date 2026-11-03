@@ -16,3 +16,11 @@ services:
       - "8501:8501"
     depends_on:
       - api
+
+  dashboard:
+    build: .
+    command: streamlit run ui/dashboard.py --server.port 8502 --server.address 0.0.0.0
+    volumes:
+      - ./reports:/srv/reports:ro
+    ports:
+      - "8502:8502"

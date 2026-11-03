@@ -1,10 +1,10 @@
+import logging
 import sqlite3
 import time
 import uuid
 from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import UTC, datetime
-
-import anthropic
 
 from app.attendance_log import AttendanceEntry, record_attendance
 from app.llm import LlmResponse, classify, configured_model
@@ -13,10 +13,22 @@ from app.outages import Outage, find_active_outage, open_ticket
 from app.pricing import estimate_cost_brl
 from app.responses import render_reply, simulation_notice
 from app.rules import DecisionInputs, decide, is_emergency
-from app.schemas import Action, Decision, TicketKind, TriageResponse
+from app.schemas import Action, Decision, TicketKind, TriageResponse, TriageResult
 from app.sessions import Session, clear_session, load_session, save_session
 
 Classifier = Callable[[str], LlmResponse]
+
+LOGGER = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class PipelineOutcome:
+    response: TriageResponse
+    triage: TriageResult | None
+    neighborhood: str | None
+    emergency: bool
+    llm: LlmResponse
+
 
 TICKET_KINDS = {
     Action.TICKET_MY_HOME: TicketKind.MY_HOME,
@@ -28,7 +40,8 @@ def classify_or_fail(classifier: Classifier, message: str) -> LlmResponse:
     started_at = time.perf_counter()
     try:
         return classifier(message)
-    except anthropic.APIError:
+    except Exception:
+        LOGGER.exception("llm call failed")
         return LlmResponse(
             result=None,
             model=configured_model(),
@@ -55,17 +68,18 @@ def update_session(
         clear_session(connection, session_id)
 
 
-def run_triage(
+def process_message(
     connection: sqlite3.Connection,
     message: str,
     session_id: str | None = None,
     classifier: Classifier = classify,
-) -> TriageResponse:
+) -> PipelineOutcome:
     active_session_id = session_id or str(uuid.uuid4())
     session = load_session(connection, active_session_id)
     full_message = f"{session.pending_message}\n{message}" if session.pending_message else message
     llm_response = classify_or_fail(classifier, full_message)
     triage = llm_response.result
+    emergency = is_emergency(full_message, triage.is_emergency if triage else False)
 
     neighborhood = match_neighborhood(triage.neighborhood_raw if triage else None)
     active_outage: Outage | None = (
@@ -73,7 +87,7 @@ def run_triage(
     )
     decision = decide(
         DecisionInputs(
-            emergency=is_emergency(full_message, triage.is_emergency if triage else False),
+            emergency=emergency,
             triage=triage,
             neighborhood=neighborhood,
             has_active_outage=active_outage is not None,
@@ -119,7 +133,7 @@ def run_triage(
             latency_seconds=llm_response.latency_seconds,
         ),
     )
-    return TriageResponse(
+    response = TriageResponse(
         session_id=active_session_id,
         reply=reply,
         action=decision.action,
@@ -130,3 +144,19 @@ def run_triage(
         protocol=protocol,
         notice=simulation_notice(),
     )
+    return PipelineOutcome(
+        response=response,
+        triage=triage,
+        neighborhood=neighborhood,
+        emergency=emergency,
+        llm=llm_response,
+    )
+
+
+def run_triage(
+    connection: sqlite3.Connection,
+    message: str,
+    session_id: str | None = None,
+    classifier: Classifier = classify,
+) -> TriageResponse:
+    return process_message(connection, message, session_id, classifier).response

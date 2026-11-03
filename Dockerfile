@@ -9,3 +9,4 @@ RUN uv sync --frozen --no-dev --no-install-project
 COPY . .
 
 ENV PATH="/srv/.venv/bin:$PATH"
+ENV PYTHONPATH=/srv

@@ -1,0 +1,23 @@
+notice: "Demonstração da Distribuidora Exemplo (empresa fictícia). As ocorrências exibidas são simuladas e nenhum dado pessoal real deve ser digitado."
+chat:
+  page_title: "Atendimento | Distribuidora Exemplo"
+  title: "Atendimento por mensagem"
+  welcome: "Olá! Conte o que está acontecendo e eu encaminho o seu atendimento."
+  input_placeholder: "Digite a sua mensagem"
+  new_conversation: "Nova conversa"
+  details_label: "Detalhes técnicos (só nesta demonstração)"
+  handed_to_human: "Encaminhado para atendente"
+  automatic: "Resolvido automaticamente"
+  fields:
+    action: "Ação"
+    queue: "Fila"
+    priority: "Prioridade"
+    protocol: "Protocolo"
+    reason: "Motivo do encaminhamento"
+  api_error: "Não foi possível falar com o serviço de atendimento. Tente novamente em instantes."
+dashboard:
+  page_title: "Painel de avaliação | Distribuidora Exemplo"
+  title: "Painel de avaliação"
+  no_report: "Nenhum relatório encontrado em reports/. Rode `make eval` primeiro."
+  latest_report: "Relatório mais recente"
+  other_models: "Modelos do mesmo conjunto e dia"
